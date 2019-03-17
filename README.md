@@ -2,7 +2,7 @@
 Scripts for generating random AoC AIs, saving them as .per files and parsing .per files into tree structures.
 
 # Notes
-* As of now, this only saves the generated AIs in a valid .per format, but cannot actually load any existing AI because of the incomplete AI language definitions in ai_constants.py
+* As of now, this only saves the generated AIs in a valid .per format (and loads back the ones saved by itself), but cannot actually load any existing AI because of the incomplete AI language definitions in ai_constants.py
 * Trees used are from the `anytree` package
 
 # Demo code (main.py)
