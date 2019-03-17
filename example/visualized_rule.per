@@ -1,0 +1,10 @@
+(defrule
+	(or
+		(gold-amount >= 1639)
+		(unit-type-count-total fire-ship-line < 49)
+	)
+	(wood-amount >= 1839)
+	(idle-farm-count >= 5)
+=>
+	(research ri-atonement)
+)
