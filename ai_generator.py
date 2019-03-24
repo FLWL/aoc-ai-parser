@@ -9,6 +9,17 @@ def visualize_tree(root_node, file_name = "random_rule"):
 
 
 def generate_subtree(cur_node):
+    if cur_node.type.endswith('|'):
+        cur_node.value = globals()[cur_node.type[0:-1]]()
+    elif cur_node.type.endswith('*'):
+        while True:
+            cur_node.value = random.choice(list(globals()[cur_node.type[0:-1]].items()))[0]
+
+            if cur_node.depth < 2 or cur_node.value not in FLOW:
+                break  # prevent control flow nodes from forming too deep in the tree
+    else:
+        cur_node.value = cur_node.type
+
     if cur_node.value not in COMBINED:
         return # terminal or unknown node
 
@@ -16,22 +27,11 @@ def generate_subtree(cur_node):
         num_children = 1
 
         if child_node_type.endswith('**'):
-            num_children = random.randint(1, 3)
+            num_children = random.randint(2, 3) if cur_node.type == 'CONDITIONS' else random.randint(1, 2) # more conditions than actions
             child_node_type = child_node_type[0:-1]
 
         for i in range(num_children):
-            child_node_value = child_node_type
-
-            if child_node_type.endswith('|'):
-                child_node_value = globals()[child_node_type[0:-1]]()
-            elif child_node_type.endswith('*'):
-                while True:
-                    child_node_value = random.choice(list(globals()[child_node_type[0:-1]].items()))[0]
-
-                    if cur_node.depth < 2 or child_node_value not in FLOW:
-                        break # prevent control flow nodes from forming too deep in the tree
-
-            child_node = Node(name=str(random.random()), type=child_node_type, value=child_node_value)
+            child_node = Node(name=str(random.random()), type=child_node_type)
             child_node.parent = cur_node
             generate_subtree(child_node)
 

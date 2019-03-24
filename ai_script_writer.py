@@ -52,6 +52,7 @@ def express_script(script_tree):
 def write_script(script_tree, file_path):
     with open(file_path, 'w') as f:
         f.write(express_script(script_tree))
+        f.flush()
 
 
 if __name__ == '__main__':

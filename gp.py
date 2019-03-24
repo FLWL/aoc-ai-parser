@@ -6,16 +6,19 @@ import time
 import string
 from ctypes import windll
 import msgpackrpc
+import matplotlib.pyplot as plt
 
 import ai_generator
 import ai_script_reader
 import ai_script_writer
 
-population_size = 16
-generations = 5
+population_size = 32
+generations = 20
 amount_of_rules = 500
-mutation_rate = 0.01
+mutation_rate = 0.02
 tournament_size = 4
+elitism = 1
+dummy_fitness = False
 scripts_directory = "C:/Shared/AoE/aoc-ai-parser/scripts/"
 
 
@@ -114,7 +117,7 @@ def mutate_node(cur_node):
             mutate_node(child_node)
 
 
-def crossover(parent1, parent2):
+def single_point_crossover(parent1, parent2):
     crossover_point = random.randint(0, amount_of_rules)
     offspring1 = parent1[0:crossover_point] + parent2[crossover_point:]
     offspring2 = parent2[0:crossover_point] + parent1[crossover_point:]
@@ -130,6 +133,29 @@ def crossover(parent1, parent2):
 
     return offspring1, offspring2
 
+
+def uniform_crossover(parent1, parent2):
+    offspring1 = []
+    offspring2 = []
+
+    for i in range(min(len(parent1), len(parent2))):
+        if random.choice([True, False]):
+            offspring1.append(parent1[i])
+            offspring2.append(parent2[i])
+        else:
+            offspring1.append(parent2[i])
+            offspring2.append(parent1[i])
+
+    #print("parent1")
+    #print(ai_script_writer.express_script(parent1))
+    #print("parent2")
+    #print(ai_script_writer.express_script(parent2))
+    #print("offspring1")
+    #print(ai_script_writer.express_script(offspring1))
+    #print("offspring2")
+    #print(ai_script_writer.express_script(offspring2))
+
+    return offspring1, offspring2
 
 script_files = []
 for filename in os.listdir(scripts_directory):
@@ -163,9 +189,9 @@ for i in range(max(0, population_size - len(scripts))):
     scripts.append([script, fitness, pad])
 
 
-def hold_tournament(scripts):
+def hold_tournament(scripts, size = tournament_size):
     random.shuffle(scripts)
-    participants = scripts[0:tournament_size]
+    participants = scripts[0:size]
     chosen = None
     chosen_fitness = -1.0
     for participant in participants:
@@ -177,14 +203,16 @@ def hold_tournament(scripts):
 
 
 autogame = None
-dummy_fitness = False
 
 generation = 0
+average_fitnesses = []
 print("Generation 0...")
 while True:
     # calculate fitnesses for any scripts that don't have any
+    fitness_sum = 0.0
     for i in range(len(scripts)):
         script = scripts[i][0]
+        print(str(i+1) + ") ", end='')
 
         if not scripts[i][1] or scripts[i][1] == 0.0:
             if not autogame and not dummy_fitness:
@@ -192,7 +220,16 @@ while True:
                 autogame = msgpackrpc.Client(msgpackrpc.Address("127.0.0.1", 64720))
 
             scripts[i][1] = get_dummy_fitness(autogame, script) if dummy_fitness else get_fitness(autogame, script)
-            print("Fitness for script " + str(scripts[i][2]) + ": " + str(scripts[i][1]))
+            print("Calc - ", end='')
+        else:
+            print("Exst - ", end='')
+
+        fitness_sum += float(scripts[i][1])
+        print("Fitness for script " + str(scripts[i][2]) + ": " + str(scripts[i][1]))
+
+    average_fitness = fitness_sum / len(scripts)
+    average_fitnesses.append(average_fitness)
+    print("----- Average fitness: " + format(average_fitness, '.2f'))
 
     # delete any existing saved scripts
     generation_dir = scripts_directory + "generation" + str(generation-1) + "/"
@@ -219,11 +256,19 @@ while True:
     print("Generation " + str(generation) + "...")
 
     new_scripts = []
+
+    # copy the amount of elitism scripts over to the new generation
+    if elitism:
+        elite = hold_tournament(scripts, len(scripts))
+        new_scripts.append(elite.copy())
+
+        print("Copied elite " + str(elite[2]) + " " + str(elite[1]))
+
     # crossover current individuals to make a new generation
     while len(new_scripts) < population_size:
         parent1 = hold_tournament(scripts)
         parent2 = hold_tournament(scripts)
-        offspring1, offspring2 = crossover(parent1[0].copy(), parent2[0].copy())
+        offspring1, offspring2 = uniform_crossover(parent1[0].copy(), parent2[0].copy())
         new_scripts.append([offspring1, 0.0, get_pad()])
         new_scripts.append([offspring2, 0.0, get_pad()])
 
@@ -234,7 +279,7 @@ while True:
     #print("New scripts len: " + str(len(scripts)))
 
     # mutate the new generation a bit
-    for i in range(len(scripts)):   # travel through all scripts
+    for i in range(elitism, len(scripts)):   # travel through all scripts, ignore elite ones
         script = scripts[i][0]
 
         for j in range(len(script)):        # loop through each rule
@@ -252,3 +297,9 @@ while True:
 
 if autogame:
     autogame.close()
+
+# plot the fitness graph
+print(average_fitnesses)
+plt.plot([x for x in range(generation+1)], [average_fitnesses[x] for x in range(generation+1)])
+plt.xticks([x for x in range(generation+1)], [x for x in range(generation+1)])
+plt.show()
