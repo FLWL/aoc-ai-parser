@@ -2,15 +2,11 @@
 Scripts for generating random AoC AIs, saving them as .per files and parsing .per files into tree structures. Also includes an experimental AI evolver based on genetic programming, which however needs further development to produce good results.
 
 # Files
-`ai_constants.py` - facts, rules, actions and other data required to operate with AI scripts
-
-`ai_generator.py` - generates random AIs as tree structures in program's memory
-
-`ai_script_writer.py` - converts the tree structures from the program's memory into .per files on the disk, that can be loaded in-game
-
-`ai_script_reader.py` - reads .per files from the disk into the program's memory as tree structures, this can be done to the extent that the `ai_constants.py` file has been populated with data
-
-`gp.py` - an example of how the tree structures could be used for genetic programming
+* `ai_constants.py` - facts, rules, actions and other data required to operate with AI scripts
+* `ai_generator.py` - generates random AIs as tree structures in program's memory
+* `ai_script_writer.py` - converts the tree structures from the program's memory into .per files on the disk, that can be loaded in-game
+* `ai_script_reader.py` - reads .per files from the disk into the program's memory as tree structures, this can be done to the extent that the `ai_constants.py` file has been populated with data
+* `gp.py` - an example of how the tree structures could be used for genetic programming
 
 # Notes
 * As of now, this only saves the generated AIs in a valid .per format (and loads back the ones saved by itself), but cannot actually load any existing AI because of the incomplete AI language definitions in `ai_constants.py`. There is however no reason why it should not be able to do that once the AI constants file has been sufficiently populated.
