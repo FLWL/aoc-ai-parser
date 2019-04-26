@@ -3,9 +3,13 @@ Scripts for generating random AoC AIs, saving them as .per files and parsing .pe
 
 # Files
 `ai_constants.py` - facts, rules, actions and other data required to operate with AI scripts
+
 `ai_generator.py` - generates random AIs as tree structures in program's memory
+
 `ai_script_writer.py` - converts the tree structures from the program's memory into .per files on the disk, that can be loaded in-game
+
 `ai_script_reader.py` - reads .per files from the disk into the program's memory as tree structures, this can be done to the extent that the `ai_constants.py` file has been populated with data
+
 `gp.py` - an example of how the tree structures could be used for genetic programming
 
 # Notes
