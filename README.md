@@ -1,5 +1,5 @@
 # aoc-ai-parser
-Scripts for generating random AoC AIs, saving them as .per files and parsing .per files into tree structures.
+Scripts for generating random AoC AIs, saving them as .per files and parsing .per files into tree structures. Also includes an experimental AI evolver based on genetic programming, which needs further development to produce good results.
 
 # Notes
 * As of now, this only saves the generated AIs in a valid .per format (and loads back the ones saved by itself), but cannot actually load any existing AI because of the incomplete AI language definitions in ai_constants.py
